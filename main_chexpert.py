@@ -23,36 +23,14 @@ np.random.seed(0)
 def train(args):
 
     # get dataloader
-    train_transform = transforms.Compose([
-            transforms.Resize((args.resize_shape, args.resize_shape)),
-            transforms.RandomCrop((args.crop_shape, args.crop_shape)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=IMAGENET_MEAN,std=IMAGENET_STD)
-    ])
-    train_dataset_args = {
-        'data_path': CHEXPERT_TRAIN_CSV, 
-        'img_type': args.img_type,
-        'data_transform': train_transform,
-    }
-    valid_dataset_args = {
-        'data_path': CHEXPERT_VALID_CSV, 
-        'img_type': args.img_type,
-        'data_transform': train_transform,
-    }
-    dataloader_args = {
-        'batch_size': args.batch_size,
-        'num_workers': args.num_workers
-    }
-    train_loader = get_dataloader(dataloader_args, train_dataset_args)
-    valid_loader = get_dataloader(dataloader_args, valid_dataset_args)
+    train_loader = get_dataloader(args, "train")
+    valid_loader = get_dataloader(args, "valid")
 
-    # put model on device
+    # get model and put on device 
     model = CheXpert(model_name="densenet121", num_classes=14)
     if args.device == "cuda" and len(args.gpu_ids) > 1:
-        print(args.gpu_ids)
         model = torch.nn.DataParallel(model, args.gpu_ids)
     model = model.to(args.device)
-    model.train()
 
     # optimizer 
     optimizer = util.set_optimizer(opt=args, model=model)
@@ -63,9 +41,9 @@ def train(args):
     # define logger
     logger = Logger(log_dir=args.log_dir, metrics_name=args.eval_metrics, args=args)
 
-    global_step = 0
-
     # iterate over epoch
+    global_step = 0
+    model.train()
     for epoch in range(args.num_epoch):
 
         # training loop
