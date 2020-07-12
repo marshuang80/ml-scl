@@ -27,7 +27,10 @@ def train(args):
     valid_loader = get_dataloader(args, "valid")
 
     # get model and put on device 
-    model = CheXpert(model_name="densenet121", num_classes=14)
+    model = CheXpert(
+        model_name=args.model_name, 
+        num_classes=14
+    )
     if args.device == "cuda" and args.num_gpus > 1:
         model = torch.nn.DataParallel(model, args.gpu_ids)
     model = model.to(args.device)
