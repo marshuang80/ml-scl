@@ -4,7 +4,8 @@ from torchvision import models as models_2d
 # Directories 
 PROJECT_DIR = Path("/data4/selfsupervision/")   # change to temp
 PROJECT_DATA_DIR = PROJECT_DIR / "chexpert"
-CHEXPERT_DATA_DIR = PROJECT_DATA_DIR / "CheXpert" / "CheXpert-v1.0"
+CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpert"
+CHEXPERT_DATA_DIR = CHEXPERT_DIR / "CheXpert-v1.0"
 
 # Project cvs files 
 CHEXPERT_TRAIN_CSV = CHEXPERT_DATA_DIR / "train.csv"
@@ -51,3 +52,10 @@ MODELS_2D = {
     'densenet169': [models_2d.densenet169, 1664],
     'densenet201': [models_2d.densenet201, 1920]
 }
+
+# Multiclass contrastive loss match type
+MATCH_TYPE = [
+    'all','any','iou_weighted',
+    'f1_weighted', 'one_weighted',
+    'zero_and_one_weighted'
+]

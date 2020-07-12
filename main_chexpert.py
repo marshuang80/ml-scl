@@ -7,6 +7,7 @@ import tqdm
 import util
 
 from constants        import *
+from args             import CheXpertTrainArgParser
 from dataset.chexpert import get_dataloader 
 from logger           import Logger
 from models           import CheXpert
@@ -27,7 +28,7 @@ def train(args):
 
     # get model and put on device 
     model = CheXpert(model_name="densenet121", num_classes=14)
-    if args.device == "cuda" and len(args.gpu_ids) > 1:
+    if args.device == "cuda" and args.num_gpus > 1:
         model = torch.nn.DataParallel(model, args.gpu_ids)
     model = model.to(args.device)
 
@@ -102,34 +103,7 @@ def train(args):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--img_type', type=str, default='Frontal', choices=['All','Frontal'])
-    parser.add_argument('--num_workers', type=int, default=8)
-    parser.add_argument('--batch_size', type=int, default=4)
-    parser.add_argument('--iters_per_eval', type=int, default=100)
-    parser.add_argument('--gpu_ids', type=str, default='0')
-    parser.add_argument('--num_epoch', type=int, default=3)
-    parser.add_argument('--resize_shape', type=int, default=320)
-    parser.add_argument('--crop_shape', type=int, default=320)
-    parser.add_argument('--optimizer', type=str, default="adam", choices=["sgd", "adam", "adamw"])
-    parser.add_argument('--lr', type=float, default=1e-3)
-    parser.add_argument('--momentum', type=float, default=0.9)
-    parser.add_argument('--sgd_dampening', type=float, default=0.9)
-    parser.add_argument('--weight_decay', type=float, default=0.0)
-    parser.add_argument('--lr_decay', type=float, default=0.1)
-    parser.add_argument('--threshold', type=float, default=0.5)
-    parser.add_argument('--log_dir', type=str, default="./logs")
-    parser.add_argument('--eval_metrics', type=str, default="auroc", choices=["auroc", "auprc", "accuracy", "precision", "recall"])
-
+    # get argumetns 
+    parser = CheXpertTrainArgParser()
     args = parser.parse_args()
-
-    # set gpu and device
-    args.gpu_ids = [int(ids) for ids in args.gpu_ids.split(",")]
-    if len(args.gpu_ids) > 0 and torch.cuda.is_available():
-        # Set default GPU for `tensor.to('cuda')`
-        torch.cuda.set_device(args.gpu_ids[0])
-        args.device = 'cuda'
-    else:
-        args.device = 'cpu'
-
     train(args)

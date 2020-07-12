@@ -3,10 +3,11 @@ import sys
 import torch
 import argparse
 sys.path.append(os.getcwd())
-import constants
+
+from constants import *
 
 
-class TrainBaseArgParser:
+class BaseTrainArgParser:
     '''Base training argument parser
     Shared with CheXpert and Contrastive loss Training
     '''
@@ -31,9 +32,16 @@ class TrainBaseArgParser:
 
         # dataset and augmentations
         self.parser.add_argument("--img_type", type=str, default="Frontal", choices=["All", "Frontal", "Lateral"])
+        self.parser.add_argument("--uncertain", type=str, default="ignore", choices=["ignore", "zero", "one"])
         self.parser.add_argument("--resize_shape", type=int, default=320)
         self.parser.add_argument("--crop_shape", type=int, default=320)
-        self.parser.add_argument("--resize_shape", type=float, default=0.9)
+        self.parser.add_argument("--rotation_range", type=int, default=20)
+
+        # wandb dir
+        self.parser.add_argument("--wandb_project_name", type=str, default="debug")
+
+        # model
+        self.parser.add_argument("--model_name", type=str, default="densenet121", choices=MODELS_2D.keys())
 
     def parse_args(self):
         args = self.parser.parse_args()
@@ -46,4 +54,8 @@ class TrainBaseArgParser:
             args.device = 'cuda'
         else:
             args.device = 'cpu'
+
+        # scale batch size by number of gpus
+        if args.device == "cuda":
+            args.batch_size = args.batch_size * args.num_gpus
         return args

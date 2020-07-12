@@ -85,13 +85,13 @@ class CheXpertDataset(Dataset):
         y = torch.tensor(y)
 
         # get images
-        path = CHEXPERT_DATA_DIR / self.df.iloc[idx]["Path"]
+        path = CHEXPERT_DIR / self.df.iloc[idx]["Path"]
         x = cv2.imread(str(path), 0)
 
         # tranform images 
         x = util.resize_img(x, 256)
         x = Image.fromarray(x).convert('RGB')
-        if (self.data_transform is not None) and self.split == "train":
+        if self.data_transform is not None:
             x = self.data_transform(x)
 
         return x, y
@@ -109,13 +109,20 @@ def get_dataloader(args, split):
     '''
 
     # transformations 
-    # TODO: maybe this deserves its own function
-    data_transform = transforms.Compose([
+    # TODO: move transforms to a function in util
+    train_transform = transforms.Compose([
         transforms.Resize((args.resize_shape, args.resize_shape)),
         transforms.RandomCrop((args.crop_shape, args.crop_shape)),
+        transforms.RandomRotation(args.rotation_range),
         transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN,std=IMAGENET_STD)
+        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
     ])
+    valid_transform = transforms.Compose([
+        transforms.Resize((args.resize_shape, args.resize_shape)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
+    ])
+    data_transform = train_transform if split == "train" else valid_transform
 
     # initialize dataset class
     csv_path = CHEXPERT_DATA_DIR / f"{split}.csv"
