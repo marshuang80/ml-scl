@@ -1,11 +1,8 @@
-from pathlib import Path
+from pathlib     import Path
+from torchvision import models as models_2d
 
 # Directories 
-PROJECT_DIR = Path("temp")   # need to modify
-if not PROJECT_DIR.is_dir():
-    raise Exception("Please modify PROJECT_DATA_DIR in constants to a valid directory")
-
-# Project folders 
+PROJECT_DIR = Path("/data4/selfsupervision/")   # change to temp
 PROJECT_DATA_DIR = PROJECT_DIR / "chexpert"
 CHEXPERT_DATA_DIR = PROJECT_DATA_DIR / "CheXpert" 
 CHEXPERT_V1_DIR = CHEXPERT_DATA_DIR / "CheXpert-v1.0"
@@ -44,3 +41,10 @@ CHEXPERT_COMPETITION_TASKS = ["Atelectasis",
                               "Consolidation",
                               "Edema",
                               "Pleural Effusion"]
+
+MODELS_2D = {
+    'densenet121': [models_2d.densenet121, 1024],
+    'densenet161': [models_2d.densenet161, 2208],
+    'densenet169': [models_2d.densenet169, 1664],
+    'densenet201': [models_2d.densenet201, 1920]
+}

@@ -25,8 +25,6 @@ def train(args):
     # get dataloader
     train_transform = transforms.Compose([
             transforms.Resize((args.resize_shape, args.resize_shape)),
-            #transforms.RandomHorizontalFlip(),
-            #transforms.RandomRotation(transform_args.rotate),
             transforms.RandomCrop((args.crop_shape, args.crop_shape)),
             transforms.ToTensor(),
             transforms.Normalize(mean=IMAGENET_MEAN,std=IMAGENET_STD)
