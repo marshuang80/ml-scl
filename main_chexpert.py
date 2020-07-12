@@ -1,16 +1,15 @@
+"""Training script for CheXpert"""
 import argparse
-import torch
-import util
-import pandas as pd
 import numpy as np
-import sklearn.metrics as sk_metrics
+import pandas as pd
+import torch
 import tqdm
+import util
 
-from constants import *
-from logger import Logger
-from torchvision import transforms
+from constants        import *
 from dataset.chexpert import get_dataloader 
-from networks.densenet import CheXpert
+from logger           import Logger
+from models           import CheXpert
 
 
 # Reproducibility
@@ -39,7 +38,11 @@ def train(args):
     loss_fn = torch.nn.BCEWithLogitsLoss(reduction="mean")
 
     # define logger
-    logger = Logger(log_dir=args.log_dir, metrics_name=args.eval_metrics, args=args)
+    logger = Logger(
+        log_dir=args.log_dir, 
+        metrics_name=args.eval_metrics, 
+        args=args
+    )
 
     # iterate over epoch
     global_step = 0
@@ -49,13 +52,13 @@ def train(args):
         # training loop
         for inputs, targets in tqdm.tqdm(train_loader, desc=f"[epoch {epoch}]"):
 
-            # validation loop 
+            # validate every N training iteration
             if global_step % args.iters_per_eval == 0:
                 model.eval()
-                probs = []
-                gt = []
+                probs, gt = [], []
                 with torch.no_grad():
 
+                    # validation loop
                     for val_inputs, val_targets in valid_loader:
 
                         batch_logits = model(val_inputs.to(args.device))
@@ -64,31 +67,18 @@ def train(args):
                         probs.append(batch_probs.cpu())
                         gt.append(val_targets.cpu())
 
+                # evaluate results 
                 metrics = util.evaluate(probs, gt, args.threshold)
-
-                # log into tensorboard 
-                avg_metric = {}
-                for m in ["auroc", "auprc", "accuracy", "precision", "recall"]:
-                    metrics_list = []
-                    for pathology in CHEXPERT_COMPETITION_TASKS:
-                        metrics_list.append(metrics[pathology][m])
-                    
-                    avg = sum(metrics_list) / len(metrics_list)
-                    avg_metric[f"val/{m}"] = avg
-                logger.log_dict(avg_metric, global_step, "val")
-
-                # save to log file
-                log_dict = {}
-                for pathology, pathology_metrics in metrics.items():
-                    for metric, value in pathology_metrics.items():
-                        log_dict[f"{pathology}_{metric}"] = [value]
-                logger.log_iteration(log_dict, global_step, "val")
+                avg_metric, metric_dict = util.aggregate_metrics(metrics)
 
                 # log image
+                logger.log_iteration(metric_dict, global_step, "val")
+                logger.log_dict(avg_metric, global_step, "val")
                 logger.log_image(inputs, global_step)
 
                 # save checkpoint
                 logger.save_checkpoint(model, metrics, global_step)
+
                 model.to(args.device)
 
             model.train()

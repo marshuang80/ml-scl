@@ -32,7 +32,7 @@ class CheXpertDataset(Dataset):
             img_type: str = "all", 
             uncertain: str = "ignore",
             split: str = "train"
-        ):
+            ):
         """Constructor for dataset class
 
         Args: 
@@ -62,9 +62,10 @@ class CheXpertDataset(Dataset):
         elif uncertain == "zero": 
             self.df['Labels'].loc[self.df['Labels'] == -1.] = 0.0
         elif uncertain == "one": 
-            self.df['Labels'].loc[self.df['Labels'] == -1.] = 0.0
+            self.df['Labels'].loc[self.df['Labels'] == -1.] = 1.0
 
         self.data_transform = data_transform
+        self.split = split
 
     def __len__(self):
         '''Returns the size of the dataset'''

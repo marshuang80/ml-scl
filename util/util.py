@@ -2,9 +2,6 @@ import math
 import numpy as np
 import torch
 import torch.optim as optim
-#import os 
-#import sys
-#sys.path.append(os.getcwd())
 import cv2
 import pandas as pd
 import sklearn.metrics as sk_metrics
@@ -153,6 +150,31 @@ def evaluate(probs, targets, threshold):
         metrics[task] = tasks_metrics
     
     return metrics
+
+def aggregate_metrics(metrics : dict ):
+    """Aggregate evaluation metrics 
+
+    Args:
+        metrics (dict): dictionary of evaluation metrics for each output class
+    """
+
+    # log into tensorboard 
+    avg_metric = {}
+    for m in CHEXPERT_EVAL_METRICS:
+        metrics_list = []
+        for pathology in CHEXPERT_COMPETITION_TASKS:
+            metrics_list.append(metrics[pathology][m])
+        
+        avg = sum(metrics_list) / len(metrics_list)
+        avg_metric[f"val/{m}"] = avg
+
+    # save to log file
+    metric_dict = {}
+    for pathology, pathology_metrics in metrics.items():
+        for metric, value in pathology_metrics.items():
+            metric_dict[f"{pathology}_{metric}"] = [value]
+
+    return avg_metric, metric_dict
 
 def resize_img(img, scale):
     """
