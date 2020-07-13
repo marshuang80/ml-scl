@@ -9,9 +9,15 @@ class MultiClassSupConLoss(nn.Module):
     Adapted from: 
         https://github.com/HobbitLong/SupContrast
     """
-    def __init__(self, temperature=0.07, contrast_mode='all',
-                 base_temperature=0.07, match_type='all'):
+    def __init__(
+            self, 
+            temperature=0.07, 
+            contrast_mode='all',
+            base_temperature=0.07, 
+            match_type='all'
+        ):
         super(MultiClassSupConLoss, self).__init__()
+
         self.temperature = temperature
         self.contrast_mode = contrast_mode
         self.base_temperature = base_temperature
@@ -53,9 +59,10 @@ class MultiClassSupConLoss(nn.Module):
             mask = torch.zeros((batch_size, batch_size)).to(device)
 
             # populate mask for complete match 
-            # [0,1,0,0] == [0,1,0,0]
             for i, gt_i in enumerate(labels):
                 for j, gt_j in enumerate(labels):
+
+                    # different ways to handle multiclass-multilabel 
                     if self.match_type == "all":
                         mask[i,j] = 1 if (gt_i == gt_j).all() else 0 
                     if self.match_type == "any":

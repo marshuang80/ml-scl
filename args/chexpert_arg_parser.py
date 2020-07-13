@@ -14,7 +14,6 @@ class CheXpertTrainArgParser(BaseTrainArgParser):
         super(CheXpertTrainArgParser, self).__init__()
 
         # CheXpert specific arguments
-        self.parser.add_argument("--iters_per_eval", type=int, default=100)
         self.parser.add_argument("--threshold", type=float, default=0.5)
         self.parser.add_argument("--log_dir", type=str, default="./chexpert_log")
         self.parser.add_argument("--eval_metrics", type=str, default="auroc", choices=CHEXPERT_EVAL_METRICS)

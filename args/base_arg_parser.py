@@ -29,6 +29,7 @@ class BaseTrainArgParser:
         self.parser.add_argument("--weight_decay", type=float, default=0.0)
         self.parser.add_argument("--momentum", type=float, default=0.9)
         self.parser.add_argument("--sgd_dampening", type=float, default=0.9)
+        self.parser.add_argument("--iters_per_eval", type=int, default=100)
 
         # dataset and augmentations
         self.parser.add_argument("--img_type", type=str, default="Frontal", choices=["All", "Frontal", "Lateral"])

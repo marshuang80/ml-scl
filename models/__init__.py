@@ -1,1 +1,1 @@
-from .models import CheXpert, SupConDenseNet
+from .models import CheXpertModel, SupConModel

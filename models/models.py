@@ -7,7 +7,7 @@ from typing      import Optional
 from constants   import *
 
 
-class SupConDenseNet(nn.Module):
+class SupConModel(nn.Module):
     """backbone + projection head
     
     Adapted from:
@@ -19,7 +19,7 @@ class SupConDenseNet(nn.Module):
             head='mlp', 
             output_dim=128
         ):
-        super(SupConDenseNet, self).__init__()
+        super(SupConModel, self).__init__()
 
         # get model and feature dims 
         model_2d, features_dim = MODELS_2D[model_name]
@@ -46,6 +46,7 @@ class SupConDenseNet(nn.Module):
                 'head not supported: {}'.format(head))
 
     def forward(self, x):
+        #x = self.encoder.module.features(x) 
         x = self.encoder.features(x) 
         if self.model_name.startswith("dense"):
             x = F.relu(x, inplace=True)
@@ -63,7 +64,7 @@ class SupConDenseNet(nn.Module):
         return ckpt
 
 
-class CheXpert(nn.Module):
+class CheXpertModel(nn.Module):
     """Normal DenseNet for CheXpert"""
     def __init__(
             self, 
@@ -72,7 +73,7 @@ class CheXpert(nn.Module):
             ckpt_path: Optional[str] = None, 
             imagenet_pretrain: bool = False
         ):
-        super(CheXpert, self).__init__()
+        super(CheXpertModel, self).__init__()
 
         self.model_name = model_name 
         self.num_classes = num_classes
@@ -82,7 +83,7 @@ class CheXpert(nn.Module):
         # Check if using contrastive pretrained 
         if self.ckpt_path is not None:
             ckpt = torch.load(self.ckpt_path)
-            self.model = SupConDenseNet(name=ckpt["model_args"].opt)
+            self.model = SupConModel(name=ckpt["model_args"].opt)
             self.model = nn.DataParallel(self.model)
             self.model.load_state_dict(ckpt["model_state"])
             features_dim = self.model.features_dim

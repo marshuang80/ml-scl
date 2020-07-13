@@ -10,7 +10,7 @@ from constants        import *
 from args             import CheXpertTrainArgParser
 from dataset.chexpert import get_dataloader 
 from logger           import Logger
-from models           import CheXpert
+from models           import CheXpertModel
 
 
 # Reproducibility
@@ -22,16 +22,20 @@ np.random.seed(0)
 
 def train(args):
 
+    # get transformations
+    train_trainsforms = util.transformation_composer(args, "train", "CheXpert")
+    valid_trainsforms = util.transformation_composer(args, "valid", "CheXpert")
+
     # get dataloader
-    train_loader = get_dataloader(args, "train")
-    valid_loader = get_dataloader(args, "valid")
+    train_loader = get_dataloader(args, train_trainsforms, "train", "CheXpert")
+    valid_loader = get_dataloader(args, valid_trainsforms, "valid", "CheXpert")
 
     # get model and put on device 
-    model = CheXpert(
+    model = CheXpertModel(
         model_name=args.model_name, 
         num_classes=14
     )
-    if args.device == "cuda" and args.num_gpus > 1:
+    if args.device == "cuda":
         model = torch.nn.DataParallel(model, args.gpu_ids)
     model = model.to(args.device)
 

@@ -31,7 +31,7 @@ class CheXpertDataset(Dataset):
             data_transform: transforms.Compose,
             img_type: str = "all", 
             uncertain: str = "ignore",
-            split: str = "train"
+            mode: str = "CheXpert"
             ):
         """Constructor for dataset class
 
@@ -41,6 +41,7 @@ class CheXpertDataset(Dataset):
             img_type (str): type of xray images to use ["All", "Frontal", "Lateral"]
             uncertain (str): how to handel uncertain cases ["ignore", "zero", "one"]
             split (str): datasplit to parse in a dataloader
+            mode (str): either CheXpert or Contrastive
         """
         # read in csv file
         self.df = pd.read_csv(csv_path)
@@ -65,7 +66,7 @@ class CheXpertDataset(Dataset):
             self.df['Labels'].loc[self.df['Labels'] == -1.] = 1.0
 
         self.data_transform = data_transform
-        self.split = split
+        self.mode = mode
 
     def __len__(self):
         '''Returns the size of the dataset'''
@@ -82,7 +83,8 @@ class CheXpertDataset(Dataset):
 
         # get prediction labels
         y = list(self.df.iloc[idx][list(self.label_cols)])
-        y = torch.tensor(y)
+        if self.mode == "CheXpert":
+            y = torch.tensor(y)
 
         # get images
         path = CHEXPERT_DIR / self.df.iloc[idx]["Path"]
@@ -97,48 +99,43 @@ class CheXpertDataset(Dataset):
         return x, y
 
 
-def get_dataloader(args, split):
+def get_dataloader(
+        args, 
+        transforms, 
+        split:str, 
+        mode:str
+    ):
     '''Defines augmentations
     Initializes Dataset with augmentations & Passes in dataset to Dataloader
 
     Params: 
         args (argsparse.ArgumentParser): arguments
+        transforms (torchvision.transforms.Compose): composed transformations
         split (str): dataset split for the dataloader
+        mode (str): either CheXpert or Contrastive
     Returns:
         dataloader (dataloader): dataloader configured with desired data augmentations
     '''
 
-    # transformations 
-    # TODO: move transforms to a function in util
-    train_transform = transforms.Compose([
-        transforms.Resize((args.resize_shape, args.resize_shape)),
-        transforms.RandomCrop((args.crop_shape, args.crop_shape)),
-        transforms.RandomRotation(args.rotation_range),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
-    ])
-    valid_transform = transforms.Compose([
-        transforms.Resize((args.resize_shape, args.resize_shape)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
-    ])
-    data_transform = train_transform if split == "train" else valid_transform
+    shuffle = True if split == "train" else False
+    csv_path = CHEXPERT_DATA_DIR / f"{split}.csv"
 
     # initialize dataset class
-    csv_path = CHEXPERT_DATA_DIR / f"{split}.csv"
     dataset = CheXpertDataset(
         csv_path = csv_path, 
         img_type = args.img_type, 
-        data_transform = data_transform,
+        data_transform = transforms,
         uncertain = args.uncertain,
-        split = split
-    )
+        mode = mode
+    ) 
     
     # create dataloader
     dataloader = DataLoader(
         dataset=dataset, 
         batch_size=args.batch_size, 
-        num_workers=args.num_workers
+        num_workers=args.num_workers,
+        shuffle=shuffle, 
+        pin_memory=False
     )
 
     return dataloader
