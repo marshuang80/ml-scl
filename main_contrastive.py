@@ -11,6 +11,7 @@ from args             import ContrastiveTrainArgParser
 from dataset.chexpert import get_dataloader 
 from logger           import Logger
 from models           import SupConModel
+from shutil           import copyfile
 from eval.loss        import MultiClassSupConLoss
 
 
@@ -60,7 +61,9 @@ def train(args):
     # iterate over epoch
     global_step = 0
     min_loss = float("inf")
+    accumulated_loss = []
     model.train()
+    best_epoch = 0
     for epoch in range(args.num_epoch):
 
         # training loop
@@ -85,6 +88,7 @@ def train(args):
 
                 # Compute the minibatch loss.
                 loss = loss_fn(features, targets.to(args.device))
+                accumulated_loss.append(loss)
 
                 logger.log_dict({"loss": loss}, global_step, "train")
 
@@ -97,8 +101,11 @@ def train(args):
             if global_step % args.iters_per_eval == 0:
 
                 logger.log_image(inputs, global_step)
+                avg_loss = np.mean(accumulated_loss)
+                accumulated_loss = []
             
-                if loss < min_loss:
+                if avg_loss < min_loss:
+                    best_epoch = epoch
                     min_loss = loss.cpu()
                     model_name = model.__class__.__name__
 
@@ -112,7 +119,11 @@ def train(args):
                     model = model.to(args.device)
 
             global_step += 1 
-
+    
+    # rename best checkpoint
+    best_ckpt_path = str(logger.ckpt_dir / f"{model_name}_{best_epoch}.pth")
+    new_ckpt_path = str(logger.ckpt_dir / f"{model_name}_best.pth")
+    copy_file(best_ckpt_path, new_ckpt_path)
 
 if __name__ == "__main__":
 
