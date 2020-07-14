@@ -107,7 +107,7 @@ def train(args):
                 print(min_loss, avg_loss)
             
                 if avg_loss < min_loss:
-                    best_epoch = epoch
+                    best_step = global_step
                     min_loss = avg_loss
                     model_name = model.module.__class__.__name__
 
