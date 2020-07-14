@@ -42,6 +42,8 @@ class BaseTrainArgParser:
         self.parser.add_argument("--wandb_project_name", type=str, default="debug")
 
         # model
+        self.parser.add_argument("--experiment_name", type=str, default="debug")
+        self.parser.add_argument("--trial_suffix", type=str, default=None)
         self.parser.add_argument("--model_name", type=str, default="densenet121", choices=MODELS_2D.keys())
 
     def parse_args(self):
@@ -59,4 +61,10 @@ class BaseTrainArgParser:
         # scale batch size by number of gpus
         if args.device == "cuda":
             args.batch_size = args.batch_size * args.num_gpus
+
+        # experiment name 
+        args.experiment_name = f"{args.model_name}_{args.optimizer}_{args.lr}"
+        if args.trial_suffix is not None:
+            args.experiment_name += f"_{args.trial_suffix}"
+
         return args

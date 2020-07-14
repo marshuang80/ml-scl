@@ -11,9 +11,9 @@ class Logger:
     def __init__(self, log_dir:str, metrics_name, args):
   
         # define relevant paths
-        self.trial_tb_dir = Path(log_dir) / 'tensorboard'   
-        self.log_file = Path(log_dir) / 'metrics'           
-        self.ckpt_dir = Path(log_dir) / 'checkpoints'       
+        self.trial_tb_dir = Path(log_dir) / args.experiment_name / 'tensorboard'   
+        self.log_file = Path(log_dir) / args.experiment_name / 'metrics'           
+        self.ckpt_dir = Path(log_dir) / args.experiment_name / 'checkpoints'       
   
         # define summery writer
         self.writer = SummaryWriter(self.trial_tb_dir)

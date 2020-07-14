@@ -5,13 +5,13 @@ import pandas as pd
 import torch
 import tqdm
 import util
+import shutil
 
 from constants        import *
 from args             import ContrastiveTrainArgParser
 from dataset.chexpert import get_dataloader 
 from logger           import Logger
 from models           import SupConModel
-from shutil           import copyfile
 from eval.loss        import MultiClassSupConLoss
 
 
@@ -109,7 +109,7 @@ def train(args):
                 if avg_loss < min_loss:
                     best_epoch = epoch
                     min_loss = avg_loss
-                    model_name = model.__class__.__name__
+                    model_name = model.module.__class__.__name__
 
                     ckpt_dict = {
                         'model_name': model_name,
@@ -125,7 +125,7 @@ def train(args):
     # rename best checkpoint
     best_ckpt_path = str(logger.ckpt_dir / f"{model_name}_{best_epoch}.pth")
     new_ckpt_path = str(logger.ckpt_dir / f"{model_name}_best.pth")
-    copy_file(best_ckpt_path, new_ckpt_path)
+    shutil.copyfile(best_ckpt_path, new_ckpt_path)
 
 if __name__ == "__main__":
 
