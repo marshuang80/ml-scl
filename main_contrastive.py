@@ -88,7 +88,7 @@ def train(args):
 
                 # Compute the minibatch loss.
                 loss = loss_fn(features, targets.to(args.device))
-                accumulated_loss.append(loss)
+                accumulated_loss.append(loss.item())
 
                 logger.log_dict({"loss": loss}, global_step, "train")
 
@@ -103,10 +103,12 @@ def train(args):
                 logger.log_image(inputs, global_step)
                 avg_loss = np.mean(accumulated_loss)
                 accumulated_loss = []
+
+                print(min_loss, avg_loss)
             
                 if avg_loss < min_loss:
                     best_epoch = epoch
-                    min_loss = loss.cpu()
+                    min_loss = avg_loss
                     model_name = model.__class__.__name__
 
                     ckpt_dict = {
