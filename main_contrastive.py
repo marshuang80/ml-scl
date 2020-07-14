@@ -63,7 +63,7 @@ def train(args):
     min_loss = float("inf")
     accumulated_loss = []
     model.train()
-    best_epoch = 0
+    best_step = 0
     for epoch in range(args.num_epoch):
 
         # training loop
@@ -123,7 +123,7 @@ def train(args):
             global_step += 1 
     
     # rename best checkpoint
-    best_ckpt_path = str(logger.ckpt_dir / f"{model_name}_{best_epoch}.pth")
+    best_ckpt_path = str(logger.ckpt_dir / f"{model_name}_{best_step}.pth")
     new_ckpt_path = str(logger.ckpt_dir / f"{model_name}_best.pth")
     shutil.copyfile(best_ckpt_path, new_ckpt_path)
 
