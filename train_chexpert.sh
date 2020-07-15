@@ -17,5 +17,8 @@ python3 -W ignore main_chexpert.py --wandb_project_name debug \
                                  --momentum 0.9 \
                                  --sgd_dampening 0.0 \
                                  --uncertain ignore \
-                                 --threshold 0.5
+                                 --threshold 0.5 \
+                                 --gaussian_noise_mean 0.0 \
+                                 --gaussian_noise_std 0.05 \
+                                 --gaussian_blur 1.0
 

@@ -34,9 +34,12 @@ class BaseTrainArgParser:
         # dataset and augmentations
         self.parser.add_argument("--img_type", type=str, default="Frontal", choices=["All", "Frontal", "Lateral"])
         self.parser.add_argument("--uncertain", type=str, default="ignore", choices=["ignore", "zero", "one"])
-        self.parser.add_argument("--resize_shape", type=int, default=320)
-        self.parser.add_argument("--crop_shape", type=int, default=320)
+        self.parser.add_argument("--resize_shape", type=int, default=256)
+        self.parser.add_argument("--crop_shape", type=int, default=256)
         self.parser.add_argument("--rotation_range", type=int, default=20)
+        self.parser.add_argument("--gaussian_noise_mean", type=float, default=None)
+        self.parser.add_argument("--gaussian_noise_std", type=float, default=None)
+        self.parser.add_argument("--gaussian_blur_radius", type=float, default=None)
 
         # wandb dir
         self.parser.add_argument("--wandb_project_name", type=str, default="debug")
@@ -63,7 +66,7 @@ class BaseTrainArgParser:
             args.batch_size = args.batch_size * args.num_gpus
 
         # experiment name 
-        args.experiment_name = f"{args.model_name}_{args.optimizer}_{args.lr}"
+        args.experiment_name = f"{args.wandb_project_name}_{args.model_name}_{args.optimizer}_{args.lr}"
         if args.trial_suffix is not None:
             args.experiment_name += f"_{args.trial_suffix}"
 

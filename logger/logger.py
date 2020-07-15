@@ -1,6 +1,7 @@
 import wandb
 import pandas as pd
 import torch
+import util
 
 from constants                import *
 from torch.utils.tensorboard  import SummaryWriter
@@ -47,9 +48,11 @@ class Logger:
         img = img[0]
   
         # unnormalize first image
-        for t, m, s in zip(img, IMAGENET_MEAN, IMAGENET_STD):
-            t.mul_(s).add_(m)
-  
+        img = util.unnormalize(img)
+
+        img[img > 1] = 1
+        img[img < 0] = 0 
+ 
         # log image
         self.writer.add_image('images', img, step)
   

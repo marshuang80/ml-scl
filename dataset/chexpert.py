@@ -31,7 +31,8 @@ class CheXpertDataset(Dataset):
             data_transform: transforms.Compose,
             img_type: str = "all", 
             uncertain: str = "ignore",
-            mode: str = "CheXpert"
+            mode: str = "CheXpert", 
+            resize_shape: float = 256
             ):
         """Constructor for dataset class
 
@@ -67,6 +68,7 @@ class CheXpertDataset(Dataset):
 
         self.data_transform = data_transform
         self.mode = mode
+        self.resize_shape = resize_shape
 
     def __len__(self):
         '''Returns the size of the dataset'''
@@ -91,7 +93,7 @@ class CheXpertDataset(Dataset):
         x = cv2.imread(str(path), 0)
 
         # tranform images 
-        x = util.resize_img(x, 256)
+        x = util.resize_img(x, self.resize_shape)
         x = Image.fromarray(x).convert('RGB')
         if self.data_transform is not None:
             x = self.data_transform(x)
@@ -126,7 +128,8 @@ def get_dataloader(
         img_type = args.img_type, 
         data_transform = transforms,
         uncertain = args.uncertain,
-        mode = mode
+        mode = mode, 
+        resize_shape = args.resize_shape
     ) 
     
     # create dataloader

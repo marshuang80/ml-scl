@@ -1,7 +1,10 @@
 import PIL
+from torch import imag
 import torchvision.transforms as t
 import cv2
+import torch
 import numpy as np
+from PIL         import Image, ImageFilter, ImageOps
 from constants   import *
 
 
@@ -12,6 +15,49 @@ class TwoCropTransform:
 
     def __call__(self, x):
         return [self.transform(x), self.transform(x)]
+
+
+class GaussianNoise:
+    '''Add gaussian noise according to the mean and std dev'''
+
+    def __init__(self, mean=0.0, std=0.05):
+        self.mean = mean
+        self.std = std
+        
+    def __call__(self, img):
+
+        std_unit = self.std / 5
+        list_std = np.array([std_unit * factor for factor in range(6)])
+        list_prob = np.array([0.5, 0.1, 0.1, 0.1, 0.1, 0.1])
+        chosen_weight = np.random.choice(list_std, p=list_prob)
+        
+        img = img + torch.randn(img.size()) * chosen_weight + self.mean
+        return img
+    
+    def __repr__(self):
+        return self.__class__.__name__ + f'(mean={self.mean}, std={self.std})'
+
+
+class GaussianBlur(object):
+    '''Add gaussian blur according to the radius'''
+
+    def __init__(self, radius=1.0):
+        self.radius = radius
+    
+    def __call__(self, img):
+        '''
+        Splits given radius into 5 increments and choses a radius increment with weighted probability
+        Applies a gaussian blur with chosen radius to PILimage and returns the blurred image 
+        '''
+        radius_unit = self.radius / 5 
+        list_radius = np.array([radius_unit * factor for factor in range(6)])
+        list_prob = np.array([0.5, 0.1, 0.1, 0.1, 0.1, 0.1])
+        chosen_radius = np.random.choice(list_radius, p=list_prob)
+        img = img.filter(ImageFilter.GaussianBlur(radius = chosen_radius))
+        return img
+    
+    def __repr__(self):
+        return self.__class__.__name__ + f'(radius={self.radius})'
 
 
 def transformation_composer(args, split: str = "train", mode: str = "Contrastive"):
@@ -33,10 +79,23 @@ def transformation_composer(args, split: str = "train", mode: str = "Contrastive
         transforms.append(t.RandomCrop((args.crop_shape, args.crop_shape)))
         transforms.append(t.RandomRotation(
                                 args.rotation_range, 
-                                resample=PIL.Image.BILINEAR
+                                resample=PIL.Image.BICUBIC
                             ))
+        # gaussian blur
+        if args.gaussian_blur_radius is not None:
+            transforms.append(GaussianBlur(args.gaussian_blur_radius))
+
+    # to torch tensor
     transforms.append(t.ToTensor())
+
+    # gaussian noise
+    if split == "train":
+        if (args.gaussian_noise_mean is not None) and (args.gaussian_noise_std) is not None:
+            transforms.append(GaussianNoise(args.gaussian_noise_mean, args.gaussian_noise_std))
+
+    # normalize
     transforms.append(t.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD))
+
     transforms = t.Compose(transforms)
 
     # check if TwoCropTransform should be applied 
@@ -89,3 +148,14 @@ def resize_img(img, scale):
     resized_img = np.pad(resized_img,[(top, bottom), (left, right)], 'constant', constant_values=0)
 
     return resized_img
+
+def unnormalize(img):
+    """Un-normalize img with mean and std before logging on tensorboard"""
+    invTrans = t.Compose([t.Normalize(mean = [ 0., 0., 0. ],
+                                      std = 1 / np.array(IMAGENET_STD)),
+                          t.Normalize(mean = - np.array(IMAGENET_MEAN),
+                                      std = [ 1., 1., 1. ]),
+                         ])
+    img = invTrans(img)
+    return img
+                        
