@@ -66,8 +66,13 @@ class BaseTrainArgParser:
             args.batch_size = args.batch_size * args.num_gpus
 
         # experiment name 
-        args.experiment_name = f"{args.wandb_project_name}_{args.model_name}_{args.optimizer}_{args.lr}"
-        if args.trial_suffix is not None:
-            args.experiment_name += f"_{args.trial_suffix}"
+        args.experiment_name = f"{args.wandb_project_name}_{args.model_name}"
+        if args.trial_suffix is None:
+            args.trial_suffix = f"{args.optimizer}_lr{args.lr}_lrd{args.lr_decay}" + \
+                                f"_wd{args.weight_decay}_rs{args.resize_shape}" + \
+                                f"_cr{args.crop_shape}_ro{args.rotation_range}" + \
+                                f"_gns{args.gaussian_noise_std}_gbr{args.gaussian_blur_radius}"
+        
+        args.experiment_name += f"_{args.trial_suffix}"
 
         return args

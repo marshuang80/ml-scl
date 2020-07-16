@@ -19,8 +19,11 @@ class Logger:
         # define summery writer
         self.writer = SummaryWriter(self.trial_tb_dir)
         hyperparameter_defaults = vars(args)
-        wandb.init(config=hyperparameter_defaults, project=args.wandb_project_name)
-  
+        if args.trial_suffix is not None:
+            wandb.init(name=args.trial_suffix, config=hyperparameter_defaults, project=args.wandb_project_name)
+        else:
+            wandb.init(config=hyperparameter_defaults, project=args.wandb_project_name)
+
         # define experiment/trial file structure
         self._init_trial_dir()
         self.min_metrics = float('-inf') #gets updated later
