@@ -34,8 +34,8 @@ class BaseTrainArgParser:
         # dataset and augmentations
         self.parser.add_argument("--img_type", type=str, default="Frontal", choices=["All", "Frontal", "Lateral"])
         self.parser.add_argument("--uncertain", type=str, default="ignore", choices=["ignore", "zero", "one"])
-        self.parser.add_argument("--resize_shape", type=int, default=256)
-        self.parser.add_argument("--crop_shape", type=int, default=256)
+        self.parser.add_argument("--resize_shape", type=int, default=None)
+        self.parser.add_argument("--crop_shape", type=int, default=None)
         self.parser.add_argument("--rotation_range", type=int, default=20)
         self.parser.add_argument("--gaussian_noise_mean", type=float, default=None)
         self.parser.add_argument("--gaussian_noise_std", type=float, default=None)
