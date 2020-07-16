@@ -74,9 +74,9 @@ def transformation_composer(args, split: str = "train", mode: str = "Contrastive
         raise Exception("Mode has to be either CheXpert or Contrastive")
 
     transforms = []
-    transforms.append(t.Resize((args.resize_shape, args.resize_shape)))
     if split == "train":
-        transforms.append(t.RandomCrop((args.crop_shape, args.crop_shape)))
+        if args.crop_shape is not None:
+            transforms.append(t.RandomCrop((args.crop_shape, args.crop_shape)))
         transforms.append(t.RandomRotation(
                                 args.rotation_range, 
                                 resample=PIL.Image.BICUBIC
