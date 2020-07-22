@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 import tqdm
 import util
+import apex
 import shutil
 
 from constants        import *
@@ -41,15 +42,19 @@ def train(args):
         head=args.head,
         output_dim=args.output_dim
     )
-    if args.device == "cuda":
-        model = torch.nn.DataParallel(model, args.gpu_ids)
-
     model = model.to(args.device)
     loss_fn = loss_fn.to(args.device)
 
-
     # optimizer 
     optimizer = util.set_optimizer(opt=args, model=model)
+
+    # 16 bit precision
+    if args.use_apex:
+        model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
+
+    # send to device
+    if args.device == "cuda":
+        model = torch.nn.DataParallel(model, args.gpu_ids)
 
     # define logger
     logger = Logger(

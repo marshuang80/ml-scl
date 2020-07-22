@@ -17,8 +17,9 @@ class BaseTrainArgParser:
             description = "Training Arguments for constrastive learning")
         
         # hardware stepup
-        self.parser.add_argument("--gpu_ids", type=str, default='0')
+        self.parser.add_argument("--gpu_ids", type=str, default='0,1,2,3')
         self.parser.add_argument("--num_workers", type=int, default=16)
+        self.parser.add_argument("--use_apex", type=self.str2bool, default=False)
 
         # training
         self.parser.add_argument("--lr", type=float, default=1e-3)
@@ -34,8 +35,8 @@ class BaseTrainArgParser:
         # dataset and augmentations
         self.parser.add_argument("--img_type", type=str, default="Frontal", choices=["All", "Frontal", "Lateral"])
         self.parser.add_argument("--uncertain", type=str, default="ignore", choices=["ignore", "zero", "one"])
-        self.parser.add_argument("--resize_shape", type=int, default=None)
-        self.parser.add_argument("--crop_shape", type=int, default=None)
+        self.parser.add_argument("--resize_shape", type=int, default=256)
+        self.parser.add_argument("--crop_shape", type=int, default=224)
         self.parser.add_argument("--rotation_range", type=int, default=20)
         self.parser.add_argument("--gaussian_noise_mean", type=float, default=None)
         self.parser.add_argument("--gaussian_noise_std", type=float, default=None)
@@ -76,3 +77,14 @@ class BaseTrainArgParser:
         args.experiment_name += f"_{args.trial_suffix}"
 
         return args
+
+    def str2bool(self, v):
+        """convert input argument to bool"""
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
