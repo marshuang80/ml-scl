@@ -79,7 +79,6 @@ def train(args):
                 # stack labels and send to device
                 targets = torch.stack(targets)
                 targets = targets.transpose_(0,1)
-                targets = targets.to(args.device, non_blocking=True)
 
                 # stack inputs
                 inputs = torch.cat([inputs[0], inputs[1]], dim=0)
@@ -92,7 +91,7 @@ def train(args):
                 features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
 
                 # Compute the minibatch loss.
-                loss = loss_fn(features, targets.to(args.device))
+                loss = loss_fn(features, targets)
                 accumulated_loss.append(loss.item())
 
                 logger.log_dict({"loss": loss}, global_step, "train")

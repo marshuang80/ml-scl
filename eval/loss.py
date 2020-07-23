@@ -59,6 +59,7 @@ class MultiClassSupConLoss(nn.Module):
             mask = torch.zeros((batch_size, batch_size)).to(device)
 
             # populate mask for complete match 
+            labels = labels.cpu().numpy()
             for i in range(len(labels)):
                 for j in range(len(labels)):
 
