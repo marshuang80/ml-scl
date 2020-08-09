@@ -1,5 +1,5 @@
 python3 -W ignore main_chexpert.py --wandb_project_name debug \
-                                 --log_dir /data4/selfsupervision/log/chexpert \
+                                 --log_dir /data/selfsupervision/log/chexpert \
                                  --num_epoch 3 \
                                  --model_name densenet121 \
                                  --optimizer adam \

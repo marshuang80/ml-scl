@@ -58,6 +58,7 @@ class CheXpertDataset(Dataset):
         self.df = self.df.fillna(0)
 
         #this changes the uncertain labels according to the parameter uncertain
+        print(self.df.shape)
         if uncertain == "ignore": 
             self.df["Remove"] = self.df.apply(lambda x: 1 if -1 in list(x[self.label_cols]) else 0, axis=1)
             self.df = self.df[~(self.df.Remove == 1)]
@@ -65,6 +66,7 @@ class CheXpertDataset(Dataset):
             self.df['Labels'].loc[self.df['Labels'] == -1.] = 0.0
         elif uncertain == "one": 
             self.df['Labels'].loc[self.df['Labels'] == -1.] = 1.0
+        print(self.df.shape)
 
         self.data_transform = data_transform
         self.mode = mode

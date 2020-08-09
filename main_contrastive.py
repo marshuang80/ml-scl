@@ -42,6 +42,7 @@ def train(args):
         head=args.head,
         output_dim=args.output_dim
     )
+    print(args.device)
     model = model.to(args.device)
     loss_fn = loss_fn.to(args.device)
 
@@ -94,6 +95,7 @@ def train(args):
                 loss = loss_fn(features, targets)
                 accumulated_loss.append(loss.item())
 
+                print(loss)
                 logger.log_dict({"loss": loss}, global_step, "train")
 
                 # Perform a backward pass.

@@ -14,7 +14,7 @@ class ContrastiveTrainArgParser(BaseTrainArgParser):
         super(ContrastiveTrainArgParser, self).__init__()
 
         # CheXpert specific arguments
-        self.parser.add_argument('--match_type', type=str, default='all', choices=MATCH_TYPE)
+        self.parser.add_argument('--match_type', type=str, default='any', choices=MATCH_TYPE)
         self.parser.add_argument("--temp", type=float, default=0.07)
         self.parser.add_argument("--log_dir", type=str, default="./contrastive_log")
         self.parser.add_argument("--head", type=str, default="mlp", choices=["mlp", "linear"])

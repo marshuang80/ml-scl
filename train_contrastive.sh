@@ -1,16 +1,17 @@
-export CUDA_VISIBLE_DEVICES=3
 python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --log_dir /data4/selfsupervision/log/contrastive \
+				 --use_apex True \
+				 --match_type any \
                                  --num_epoch 3 \
                                  --model_name densenet121 \
                                  --optimizer adam \
                                  --lr 0.001 \
-                                 --batch_size 4 \
+                                 --batch_size 128 \
                                  --num_workers 8 \
                                  --iters_per_eval 100 \
-                                 --gpu_ids 0 \
-                                 --resize_shape 320 \
-                                 --crop_shape 320 \
+                                 --gpu_ids 0,1,2,3 \
+                                 --resize_shape 150 \
+                                 --crop_shape 128 \
                                  --rotation_range 20 \
                                  --img_type Frontal \
                                  --lr_decay 0.1 \

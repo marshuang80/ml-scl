@@ -1,0 +1,38 @@
+program: main_contrastive.py
+method: bayes
+metric:
+  name: loss
+  goal: minimize
+parameters:
+  lr:
+    values: [0.1, 0.01, 0.001]
+  optimizer:
+    values: ["sgd", "adam"] 
+  wandb_project_name: 
+    value: ContrastiveAny128
+  match_type: 
+    value: any
+  temp: 
+    value: 0.07
+  gpu_ids: 
+    value: 0,1,2,3
+  use_apex:
+    value: True
+  num_epoch: 
+    value: 2
+  batch_size: 
+    value: 128
+  resize_shape: 
+    value: 150
+  crop_shape: 
+    value: 128
+  rotation_range: 
+    value: 30
+  gaussian_noise_mean: 
+    value: 0.0
+  gaussian_noise_std: 
+    value: 0.05
+  gaussian_blur_radius: 
+    value: 1.0
+  model_name: 
+    value: densenet121
