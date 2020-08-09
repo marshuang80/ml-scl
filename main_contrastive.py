@@ -5,7 +5,6 @@ import pandas as pd
 import torch
 import tqdm
 import util
-import apex
 import shutil
 
 from constants        import *
@@ -42,7 +41,6 @@ def train(args):
         head=args.head,
         output_dim=args.output_dim
     )
-    print(args.device)
     model = model.to(args.device)
     loss_fn = loss_fn.to(args.device)
 
@@ -51,10 +49,13 @@ def train(args):
 
     # 16 bit precision
     if args.use_apex:
-        model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
+        scaler = torch.cuda.amp.GradScaler() 
+        #model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
 
     # send to device
-    if args.device == "cuda":
+    if args.device == "cuda" and args.num_gpus > 1:
+        print("-"*80)
+        print("Using Data Parallel")
         model = torch.nn.DataParallel(model, args.gpu_ids)
 
     # define logger
@@ -76,7 +77,7 @@ def train(args):
         for inputs, targets in tqdm.tqdm(train_loader, desc=f"[epoch {epoch}]"):
 
             with torch.set_grad_enabled(True):
-
+                
                 # stack labels and send to device
                 targets = torch.stack(targets)
                 targets = targets.transpose_(0,1)
@@ -86,22 +87,29 @@ def train(args):
                 inputs = inputs.to(args.device, non_blocking=True)
 
                 # compute loss
-                features = model(inputs)
-                batch_size = targets.shape[0]
-                f1, f2 = torch.split(features, [batch_size, batch_size], dim=0)
-                features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
+                with torch.cuda.amp.autocast(enabled=args.use_apex):
+                    features = model(inputs, args.use_apex)
 
-                # Compute the minibatch loss.
-                loss = loss_fn(features, targets)
+                    batch_size = targets.shape[0]
+                    f1, f2 = torch.split(features, [batch_size, batch_size], dim=0)
+                    features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
+
+                    # Compute the minibatch loss.
+                    loss = loss_fn(features, targets)
+
                 accumulated_loss.append(loss.item())
 
-                print(loss)
                 logger.log_dict({"loss": loss}, global_step, "train")
 
-                # Perform a backward pass.
                 optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+                # Perform a backward pass.
+                if args.use_apex:
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    optimizer.step()
 
             # save checkpoint every N iterations 
             if global_step % args.iters_per_eval == 0:
@@ -109,8 +117,6 @@ def train(args):
                 logger.log_image(inputs, global_step)
                 avg_loss = np.mean(accumulated_loss)
                 accumulated_loss = []
-
-                print(min_loss, avg_loss)
             
                 if avg_loss < min_loss:
                     best_step = global_step

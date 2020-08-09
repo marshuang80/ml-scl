@@ -69,12 +69,12 @@ class MultiClassSupConLoss(nn.Module):
                     # different ways to handle multiclass-multilabel 
                     if self.match_type == "all":
                         mask[i,j] = 1 if (gt_i == gt_j).all() else 0 
-                    if self.match_type == "any":
+                    elif self.match_type == "any":
                         pos_idx = (gt_i == 1) | (gt_j == 1)
                         gt_i = gt_i[pos_idx]
                         gt_j = gt_j[pos_idx]
                         mask[i,j] = 1 if (gt_i == gt_j).any() else 0 
-                    if self.match_type == "iou_weighted":
+                    elif self.match_type == "iou_weighted":
                         pos_idx = (gt_i == 1) | (gt_j == 1)
                         gt_i = gt_i[pos_idx]
                         gt_j = gt_j[pos_idx]
@@ -83,7 +83,7 @@ class MultiClassSupConLoss(nn.Module):
                         else: 
                             weight = (gt_i == gt_j).sum() / pos_idx.sum()
                         mask[i,j] = weight
-                    if self.match_type == "f1_weighted":
+                    elif self.match_type == "f1_weighted":
                         pos_idx = (gt_i == 1) | (gt_j == 1)
                         gt_i = gt_i[pos_idx]
                         gt_j = gt_j[pos_idx]
@@ -92,14 +92,16 @@ class MultiClassSupConLoss(nn.Module):
                         fn = gt_j.sum() - tp
                         weight = (2*tp) / (2*tp + fp + fn)
                         mask[i,j] = weight
-                    if self.match_type == "one_weighted":
+                    elif self.match_type == "one_weighted":
                         pos_idx = (gt_i == 1) | (gt_j == 1)
                         gt_i = gt_i[pos_idx]
                         gt_j = gt_j[pos_idx]
                         weight = (gt_i == gt_j).sum() / len(gt_i)
                         mask[i,j] = weight
-                    if self.match_type == "zero_and_one_weighted":
+                    elif self.match_type == "zero_and_one_weighted":
                         mask[i,j] = (gt_i == gt_j).sum() / len(gt_i)
+                    else:
+                        print(f"match type {self.match_type} is not implemented")
         else:
             mask = mask.float().to(device)
 
@@ -139,7 +141,7 @@ class MultiClassSupConLoss(nn.Module):
         log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
 
         # compute mean of log-likelihood over positive
-        mean_log_prob_pos = (mask * log_prob).sum(1) / mask.sum(1)
+        mean_log_prob_pos = (mask * log_prob).sum(1) / (mask.sum(1))
 
         # loss
         loss = - (self.temperature / self.base_temperature) * mean_log_prob_pos

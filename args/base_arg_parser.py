@@ -19,12 +19,12 @@ class BaseTrainArgParser:
         # hardware stepup
         self.parser.add_argument("--gpu_ids", type=str, default='0,1,2,3')
         self.parser.add_argument("--num_workers", type=int, default=16)
-        self.parser.add_argument("--use_apex", type=self.str2bool, default=False)
+        self.parser.add_argument("--use_apex", type=self.str2bool, default=True)
 
         # training
         self.parser.add_argument("--lr", type=float, default=1e-3)
         self.parser.add_argument("--num_epoch", type=int, default=3)
-        self.parser.add_argument("--batch_size", type=int, default=8)
+        self.parser.add_argument("--batch_size", type=int, default=128)
         self.parser.add_argument("--optimizer", type=str, default="adam", choices=["sgd", "adam", "adamw"])
         self.parser.add_argument("--lr_decay", type=float, default=0.1)
         self.parser.add_argument("--weight_decay", type=float, default=0.0)
