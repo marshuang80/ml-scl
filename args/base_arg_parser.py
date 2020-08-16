@@ -60,7 +60,7 @@ class BaseTrainArgParser:
             torch.cuda.set_device(args.gpu_ids[0])
             args.device = 'cuda'
         else:
-            args.device = 'cpu'
+            args.device = 'tpu'
 
         # scale batch size by number of gpus
         if args.device == "cuda":

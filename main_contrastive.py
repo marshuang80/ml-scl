@@ -6,6 +6,7 @@ import torch
 import tqdm
 import util
 import shutil
+import torch_xla.core.xla_model as xm
 
 from constants        import *
 from args             import ContrastiveTrainArgParser
@@ -41,8 +42,15 @@ def train(args):
         head=args.head,
         output_dim=args.output_dim
     )
-    model = model.to(args.device)
-    loss_fn = loss_fn.to(args.device)
+
+    # set tpu
+    if args.device == 'tpu':
+        device = xm.xla_device()
+    else: 
+        device = 'cuda'
+
+    model = model.to(device)
+    loss_fn = loss_fn.to(device)
 
     # optimizer 
     optimizer = util.set_optimizer(opt=args, model=model)
@@ -84,7 +92,7 @@ def train(args):
 
                 # stack inputs
                 inputs = torch.cat([inputs[0], inputs[1]], dim=0)
-                inputs = inputs.to(args.device, non_blocking=True)
+                inputs = inputs.to(device, non_blocking=True)
 
                 # compute loss
                 with torch.cuda.amp.autocast(enabled=args.use_apex):
@@ -107,7 +115,11 @@ def train(args):
                     scaler.scale(loss).backward()
                     scaler.step(optimizer)
                     scaler.update()
-                else:
+                elif args.device == 'tpu':
+                    # barrier = True not needed when we use parallel loader
+                    loss.backward()
+                    xm.optimizer_step(optimizer, barrier=True)
+                else: 
                     loss.backward()
                     optimizer.step()
 
@@ -130,7 +142,7 @@ def train(args):
                     }
                     ckpt_path = logger.ckpt_dir / f"{model_name}_{global_step}.pth"
                     torch.save(ckpt_dict, ckpt_path)
-                    model = model.to(args.device)
+                    model = model.to(device)
 
             global_step += 1 
     
