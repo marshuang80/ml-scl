@@ -2,9 +2,12 @@ from pathlib     import Path
 from torchvision import models as models_2d
 
 # Directories 
-PROJECT_DIR = Path("/data4/selfsupervision/")   # change to temp
-PROJECT_DATA_DIR = PROJECT_DIR / "chexpert"
-CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpert"
+#PROJECT_DIR = Path("/data/CheXpertToy/")   # change to temp
+#PROJECT_DATA_DIR = PROJECT_DIR / "chexpert"
+#CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpert"
+#CHEXPERT_DATA_DIR = CHEXPERT_DIR / "CheXpert-v1.0"
+PROJECT_DATA_DIR = Path("/data/")
+CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpertToy"
 CHEXPERT_DATA_DIR = CHEXPERT_DIR / "CheXpert-v1.0"
 
 # Project cvs files 

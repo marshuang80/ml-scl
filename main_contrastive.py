@@ -133,13 +133,20 @@ def train(args):
                 if avg_loss < min_loss:
                     best_step = global_step
                     min_loss = avg_loss
-                    model_name = model.module.__class__.__name__
-
-                    ckpt_dict = {
-                        'model_name': model_name,
-                        'model_args': model.module.cpu().args_dict(),
-                        'model_state': model.module.cpu().state_dict()
-                    }
+                    if args.device == "cuda":
+                        model_name = model.module.__class__.__name__
+                        ckpt_dict = {
+                            'model_name': model_name,
+                            'model_args': model.module.cpu().args_dict(),
+                            'model_state': model.module.cpu().state_dict()
+                        }
+                    else:
+                        model_name = model.__class__.__name__
+                        ckpt_dict = {
+                            'model_name': model_name,
+                            'model_args': model.args_dict(),
+                            'model_state': model.state_dict()
+                        }
                     ckpt_path = logger.ckpt_dir / f"{model_name}_{global_step}.pth"
                     torch.save(ckpt_dict, ckpt_path)
                     model = model.to(device)

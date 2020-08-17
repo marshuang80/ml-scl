@@ -19,7 +19,7 @@ class BaseTrainArgParser:
         # hardware stepup
         self.parser.add_argument("--gpu_ids", type=str, default='0,1,2,3')
         self.parser.add_argument("--num_workers", type=int, default=16)
-        self.parser.add_argument("--use_apex", type=self.str2bool, default=True)
+        self.parser.add_argument("--use_apex", type=self.str2bool, default=False)
 
         # training
         self.parser.add_argument("--lr", type=float, default=1e-3)

@@ -1,6 +1,5 @@
 python3 -W ignore main_contrastive.py --wandb_project_name debug \
-                                 --log_dir /data4/selfsupervision/log/contrastive \
-				 --use_apex True \
+                                 --log_dir /data/log/contrastive \
 				 --match_type any \
                                  --num_epoch 3 \
                                  --model_name densenet121 \
@@ -9,7 +8,6 @@ python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --batch_size 128 \
                                  --num_workers 8 \
                                  --iters_per_eval 100 \
-                                 --gpu_ids 0,1,2,3 \
                                  --resize_shape 150 \
                                  --crop_shape 128 \
                                  --rotation_range 20 \
@@ -22,4 +20,6 @@ python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --temp 0.07 \
                                  --head mlp \
                                  --output_dim 128 \
+				 #--use_apex True \
+                                 #--gpu_ids 0,1,2,3 \
 
