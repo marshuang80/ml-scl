@@ -6,7 +6,7 @@ python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --optimizer adam \
                                  --lr 0.001 \
                                  --batch_size 128 \
-                                 --num_workers 8 \
+                                 --num_workers 64 \
                                  --iters_per_eval 100 \
                                  --resize_shape 150 \
                                  --crop_shape 128 \
@@ -20,6 +20,5 @@ python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --temp 0.07 \
                                  --head mlp \
                                  --output_dim 128 \
-				 #--use_apex True \
-                                 #--gpu_ids 0,1,2,3 \
-
+				 --use_apex True \
+                                 --gpu_ids 0,1,2,3,4,5,6,7 

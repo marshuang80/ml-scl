@@ -47,13 +47,13 @@ class SupConModel(nn.Module):
 
     def forward(self, x, use_apex):
         #x = self.encoder.module.features(x) 
-        with torch.cuda.amp.autocast(enabled=use_apex):
-            x = self.encoder.features(x) 
-            if self.model_name.startswith("dense"):
-                x = F.relu(x, inplace=True)
-            x = self.pool(x) 
-            x = torch.flatten(x, 1)
-            x = F.normalize(self.fc(x), dim=1)
+        #with torch.cuda.amp.autocast(enabled=use_apex):
+        x = self.encoder.features(x) 
+        if self.model_name.startswith("dense"):
+            x = F.relu(x, inplace=True)
+        x = self.pool(x) 
+        x = torch.flatten(x, 1)
+        x = F.normalize(self.fc(x), dim=1)
         return x
 
     def args_dict(self):

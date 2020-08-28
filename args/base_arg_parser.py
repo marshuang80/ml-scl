@@ -66,6 +66,8 @@ class BaseTrainArgParser:
         if args.device == "cuda":
             args.batch_size = args.batch_size * args.num_gpus
 
+        print(f"Batch size {args.batch_size}")
+
         # experiment name 
         args.experiment_name = f"{args.wandb_project_name}_{args.model_name}"
         if args.trial_suffix is None:

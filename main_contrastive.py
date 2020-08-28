@@ -6,7 +6,7 @@ import torch
 import tqdm
 import util
 import shutil
-import torch_xla.core.xla_model as xm
+#import torch_xla.core.xla_model as xm
 
 from constants        import *
 from args             import ContrastiveTrainArgParser
@@ -14,6 +14,8 @@ from dataset.chexpert import get_dataloader
 from logger           import Logger
 from models           import SupConModel
 from eval.loss        import MultiClassSupConLoss
+
+print(torch.__version__)
 
 
 # Reproducibility
@@ -44,10 +46,10 @@ def train(args):
     )
 
     # set tpu
-    if args.device == 'tpu':
-        device = xm.xla_device()
-    else: 
-        device = 'cuda'
+    #if args.device == 'tpu':
+    #    device = xm.xla_device()
+    #else: 
+    device = 'cuda'
 
     model = model.to(device)
     loss_fn = loss_fn.to(device)
@@ -56,9 +58,9 @@ def train(args):
     optimizer = util.set_optimizer(opt=args, model=model)
 
     # 16 bit precision
-    if args.use_apex:
-        scaler = torch.cuda.amp.GradScaler() 
-        #model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
+    #if args.use_apex:
+    #    scaler = torch.cuda.amp.GradScaler() 
+         #model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
 
     # send to device
     if args.device == "cuda" and args.num_gpus > 1:
@@ -95,15 +97,15 @@ def train(args):
                 inputs = inputs.to(device, non_blocking=True)
 
                 # compute loss
-                with torch.cuda.amp.autocast(enabled=args.use_apex):
-                    features = model(inputs, args.use_apex)
+                #with torch.cuda.amp.autocast(enabled=args.use_apex):
+                features = model(inputs, args.use_apex)
 
-                    batch_size = targets.shape[0]
-                    f1, f2 = torch.split(features, [batch_size, batch_size], dim=0)
-                    features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
+                batch_size = targets.shape[0]
+                f1, f2 = torch.split(features, [batch_size, batch_size], dim=0)
+                features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
 
-                    # Compute the minibatch loss.
-                    loss = loss_fn(features, targets)
+                # Compute the minibatch loss.
+                loss = loss_fn(features, targets)
 
                 accumulated_loss.append(loss.item())
 
@@ -111,17 +113,17 @@ def train(args):
 
                 optimizer.zero_grad()
                 # Perform a backward pass.
-                if args.use_apex:
-                    scaler.scale(loss).backward()
-                    scaler.step(optimizer)
-                    scaler.update()
-                elif args.device == 'tpu':
+                #if args.use_apex:
+                #    scaler.scale(loss).backward()
+                #    scaler.step(optimizer)
+                #    scaler.update()
+                #elif args.device == 'tpu':
                     # barrier = True not needed when we use parallel loader
-                    loss.backward()
-                    xm.optimizer_step(optimizer, barrier=True)
-                else: 
-                    loss.backward()
-                    optimizer.step()
+                #    loss.backward()
+                #    xm.optimizer_step(optimizer, barrier=True)
+                #else: 
+                loss.backward()
+                optimizer.step()
 
             # save checkpoint every N iterations 
             if global_step % args.iters_per_eval == 0:

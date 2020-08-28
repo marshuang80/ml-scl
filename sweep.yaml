@@ -5,21 +5,23 @@ metric:
   goal: minimize
 parameters:
   lr:
-    values: [0.1, 0.01, 0.001]
+    values: [0.01, 0.001, 0.0001]
   optimizer:
     values: ["sgd", "adam"] 
   wandb_project_name: 
-    value: ContrastiveAny128
+    value: ContrastiveAll128
   match_type: 
-    value: any
+    value: all
   temp: 
     value: 0.07
   gpu_ids: 
-    value: 0,1,2,3
+    value: 0,1,2,3,4,5,6,7
   use_apex:
     value: True
   num_epoch: 
-    value: 2
+    value: 3
+  num_workers:
+    value: 64
   batch_size: 
     value: 128
   resize_shape: 

@@ -6,8 +6,8 @@ from torchvision import models as models_2d
 #PROJECT_DATA_DIR = PROJECT_DIR / "chexpert"
 #CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpert"
 #CHEXPERT_DATA_DIR = CHEXPERT_DIR / "CheXpert-v1.0"
-PROJECT_DATA_DIR = Path("/data/")
-CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpertToy"
+PROJECT_DATA_DIR = Path("/data/ml-scl/")
+CHEXPERT_DIR = PROJECT_DATA_DIR / "CheXpert"
 CHEXPERT_DATA_DIR = CHEXPERT_DIR / "CheXpert-v1.0"
 
 # Project cvs files 
