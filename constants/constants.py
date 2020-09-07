@@ -62,3 +62,8 @@ MATCH_TYPE = [
     'f1_weighted', 'one_weighted',
     'zero_and_one_weighted'
 ]
+
+LOSS_TYPE = [
+    'sim_clr', 'sup_con'
+]
+

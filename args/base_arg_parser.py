@@ -62,10 +62,6 @@ class BaseTrainArgParser:
         else:
             args.device = 'tpu'
 
-        # scale batch size by number of gpus
-        if args.device == "cuda":
-            args.batch_size = args.batch_size * args.num_gpus
-
         print(f"Batch size {args.batch_size}")
 
         # experiment name 

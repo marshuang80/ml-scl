@@ -1,5 +1,6 @@
 python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --log_dir /data/log/contrastive \
+				 --loss_type sim_clr \
 				 --match_type any \
                                  --num_epoch 3 \
                                  --model_name densenet121 \
@@ -21,4 +22,4 @@ python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --head mlp \
                                  --output_dim 128 \
 				 --use_apex True \
-                                 --gpu_ids 0,1,2,3,4,5,6,7 
+                                 --gpu_ids 4,5,6,7 

@@ -6,6 +6,7 @@ import torch
 import tqdm
 import util
 import shutil
+import apex
 #import torch_xla.core.xla_model as xm
 
 from constants        import *
@@ -14,9 +15,13 @@ from dataset.chexpert import get_dataloader
 from logger           import Logger
 from models           import SupConModel
 from eval.loss        import MultiClassSupConLoss
-
+from apex             import amp
 print(torch.__version__)
 
+
+import resource
+rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+resource.setrlimit(resource.RLIMIT_NOFILE, (2048, rlimit[1]))
 
 # Reproducibility
 torch.manual_seed(6)
@@ -58,9 +63,9 @@ def train(args):
     optimizer = util.set_optimizer(opt=args, model=model)
 
     # 16 bit precision
-    #if args.use_apex:
-    #    scaler = torch.cuda.amp.GradScaler() 
-         #model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
+    if args.use_apex:
+        #scaler = torch.cuda.amp.GradScaler() 
+        model, optimizer = apex.amp.initialize(model, optimizer, opt_level="O1")
 
     # send to device
     if args.device == "cuda" and args.num_gpus > 1:
@@ -105,25 +110,23 @@ def train(args):
                 features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
 
                 # Compute the minibatch loss.
-                loss = loss_fn(features, targets)
-
+                if args.loss_type == "sup_con":
+                    loss = loss_fn(features, targets)
+                elif args.loss_type == "sim_clr":
+                    loss = loss_fn(features)
                 accumulated_loss.append(loss.item())
 
                 logger.log_dict({"loss": loss}, global_step, "train")
 
                 optimizer.zero_grad()
                 # Perform a backward pass.
-                #if args.use_apex:
-                #    scaler.scale(loss).backward()
-                #    scaler.step(optimizer)
-                #    scaler.update()
-                #elif args.device == 'tpu':
-                    # barrier = True not needed when we use parallel loader
-                #    loss.backward()
-                #    xm.optimizer_step(optimizer, barrier=True)
-                #else: 
-                loss.backward()
-                optimizer.step()
+                if args.use_apex:
+                    with amp.scale_loss(loss, optimizer) as scaled_loss:
+                        scaled_loss.backward()
+                    optimizer.step()
+                else: 
+                    loss.backward()
+                    optimizer.step()
 
             # save checkpoint every N iterations 
             if global_step % args.iters_per_eval == 0:

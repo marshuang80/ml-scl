@@ -48,6 +48,7 @@ class MultiClassSupConLoss(nn.Module):
         batch_size = features.shape[0]
         if labels is not None and mask is not None:
             raise ValueError('Cannot define both `labels` and `mask`')
+        # using simclr
         elif labels is None and mask is None:
             mask = torch.eye(batch_size, dtype=torch.float32).to(device)
         elif labels is not None:
