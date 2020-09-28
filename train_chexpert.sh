@@ -1,15 +1,12 @@
-python3 -W ignore main_chexpert.py --wandb_project_name debug \
-                                 --log_dir /data/selfsupervision/log/chexpert \
-                                 --num_epoch 3 \
+python3 -W ignore train_chexpert.py --log_dir /data4/selfsupervision/log/chexpert \
+                                 --wandb_project_name CheXpert \
                                  --model_name densenet121 \
                                  --optimizer adam \
-                                 --lr 0.001 \
+                                 --lr 0.00158 \
                                  --batch_size 16 \
                                  --num_workers 8 \
-                                 --iters_per_eval 100 \
-                                 --gpu_ids 3 \
-                                 --resize_shape 320 \
-                                 --crop_shape 320 \
+                                 --resize_shape 256 \
+                                 --crop_shape 224 \
                                  --rotation_range 20 \
                                  --img_type Frontal \
                                  --lr_decay 0.1 \
@@ -20,5 +17,15 @@ python3 -W ignore main_chexpert.py --wandb_project_name debug \
                                  --threshold 0.5 \
                                  --gaussian_noise_mean 0.0 \
                                  --gaussian_noise_std 0.05 \
-                                 --gaussian_blur 1.0
+                                 --gaussian_blur 1.0 \
+                                 --deterministic True \
+                                 --benchmark True \
+                                 --precision 16 \
+                                 --distributed_backend dp \
+                                 --gpus 4 \
+                                 --min_epochs 0 \
+                                 --max_epoch 3 \
+                                 --weights_save_path /data4/selfsupervision/log/chexpert/ \
+                                 --val_check_interval 100 \
+                                 #--auto_lr_find lr \
 

@@ -95,12 +95,12 @@ def aggregate_metrics(metrics : dict):
             metrics_list.append(metrics[pathology][m])
         
         avg = sum(metrics_list) / len(metrics_list)
-        avg_metric[f"val/{m}"] = avg
+        avg_metric[f"val_{m}"] = avg
 
     # save to log file
     metric_dict = {}
     for pathology, pathology_metrics in metrics.items():
         for metric, value in pathology_metrics.items():
-            metric_dict[f"{pathology}_{metric}"] = [value]
+            metric_dict[f"{pathology}_{metric}"] = value
 
     return avg_metric, metric_dict

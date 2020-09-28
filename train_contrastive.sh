@@ -1,15 +1,13 @@
-python3 -W ignore main_contrastive.py --wandb_project_name debug \
-                                 --log_dir /data/log/contrastive \
-				 --match_type any \
-                                 --num_epoch 3 \
+python3 -W ignore train_contrastive.py --log_dir /data4/selfsupervision/log/contrastive \
+                                 --wandb_project_name Contrastive \
                                  --model_name densenet121 \
+                                 --contrast_mode all \
                                  --optimizer adam \
-                                 --lr 0.001 \
-                                 --batch_size 128 \
+                                 --lr 0.00158 \
+                                 --batch_size 16 \
                                  --num_workers 8 \
-                                 --iters_per_eval 100 \
-                                 --resize_shape 150 \
-                                 --crop_shape 128 \
+                                 --resize_shape 256 \
+                                 --crop_shape 224 \
                                  --rotation_range 20 \
                                  --img_type Frontal \
                                  --lr_decay 0.1 \
@@ -17,9 +15,14 @@ python3 -W ignore main_contrastive.py --wandb_project_name debug \
                                  --momentum 0.9 \
                                  --sgd_dampening 0.0 \
                                  --uncertain ignore \
-                                 --temp 0.07 \
-                                 --head mlp \
-                                 --output_dim 128 \
-				 #--use_apex True \
-                                 #--gpu_ids 0,1,2,3 \
-
+                                 --gaussian_noise_mean 0.0 \
+                                 --gaussian_noise_std 0.05 \
+                                 --gaussian_blur 1.0 \
+                                 --deterministic True \
+                                 --benchmark True \
+                                 --precision 16 \
+                                 --distributed_backend dp \
+                                 --gpus 4 \
+                                 --min_epochs 0 \
+                                 --max_epoch 3 \
+                                 --weights_save_path /data4/selfsupervision/log/contrastive/ \
