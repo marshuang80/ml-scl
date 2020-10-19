@@ -28,10 +28,9 @@ class CheXpertDataset(Dataset):
     def __init__(
             self,
             csv_path: Union[str, Path],
-            data_transform: transforms.Compose,
+            data_transform: transforms.Compose, # TODO: rename to transform
             img_type: str = "all", 
             uncertain: str = "ignore",
-            mode: str = "CheXpert", 
             resize_shape: float = 256
             ):
         """Constructor for dataset class
@@ -45,7 +44,7 @@ class CheXpertDataset(Dataset):
             mode (str): either CheXpert or Contrastive
         """
         # read in csv file
-        self.df = pd.read_csv(csv_path)
+        self.df = pd.read_csv(csv_path, engine='python')
 
         # filter image type 
         if img_type != "All":
@@ -70,7 +69,6 @@ class CheXpertDataset(Dataset):
         self.df = self.df[~(self.df[self.label_cols] == 0).all(1)]
 
         self.data_transform = data_transform
-        self.mode = mode
         self.resize_shape = resize_shape
 
     def __len__(self):
@@ -88,8 +86,7 @@ class CheXpertDataset(Dataset):
 
         # get prediction labels
         y = list(self.df.iloc[idx][list(self.label_cols)])
-        if self.mode == "CheXpert":
-            y = torch.tensor(y)
+        y = torch.tensor(y)
 
         # get images
         path = CHEXPERT_DIR / self.df.iloc[idx]["Path"]
