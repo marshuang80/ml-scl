@@ -29,6 +29,7 @@ class CheXpertDataset(Dataset):
             self,
             csv_path: Union[str, Path],
             data_transform: transforms.Compose, # TODO: rename to transform
+            data_dir: str = CHEXPERT_DIR,
             img_type: str = "all", 
             uncertain: str = "ignore",
             resize_shape: float = 256
@@ -70,6 +71,7 @@ class CheXpertDataset(Dataset):
 
         self.data_transform = data_transform
         self.resize_shape = resize_shape
+        self.data_dir = data_dir
 
     def __len__(self):
         '''Returns the size of the dataset'''
@@ -89,7 +91,7 @@ class CheXpertDataset(Dataset):
         y = torch.tensor(y)
 
         # get images
-        path = CHEXPERT_DIR / self.df.iloc[idx]["Path"]
+        path = self.data_dir / self.df.iloc[idx]["Path"]
         x = cv2.imread(str(path), 0)
 
         # tranform images 
