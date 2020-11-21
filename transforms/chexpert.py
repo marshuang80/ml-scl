@@ -9,6 +9,8 @@ from warnings import warn
 
 import PIL
 import numpy as np
+from typing import List
+
 
 try:
     import torchvision.transforms as transforms
